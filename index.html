@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>Azure Maps Demos</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <script src="./config.js"></script>
+  <script src="./local-config.js" defer></script>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+    .container {
+      max-width: 800px;
+      width: 100%;
+    }
+    h1 {
+      color: white;
+      text-align: center;
+      margin-bottom: 40px;
+      font-size: 2.5em;
+    }
+    .demos {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 20px;
+    }
+    .demo-card {
+      background: white;
+      border-radius: 8px;
+      padding: 30px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+      transition: transform 0.3s, box-shadow 0.3s;
+      text-decoration: none;
+      color: inherit;
+      display: block;
+    }
+    .demo-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 15px 40px rgba(0, 0, 0, 0.4);
+    }
+    .demo-card h2 {
+      color: #667eea;
+      margin-bottom: 15px;
+      font-size: 1.5em;
+    }
+    .demo-card p {
+      color: #666;
+      margin-bottom: 20px;
+      line-height: 1.6;
+    }
+    .demo-card a {
+      display: inline-block;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      padding: 10px 20px;
+      border-radius: 5px;
+      text-decoration: none;
+      font-weight: 600;
+      transition: opacity 0.3s;
+    }
+    .demo-card a:hover {
+      opacity: 0.9;
+    }
+    .footer {
+      text-align: center;
+      color: white;
+      margin-top: 40px;
+      font-size: 0.9em;
+    }
+  </style>
+</head>
+<body>
+
+<div class="container">
+  <h1>🗺️ Azure Maps Demos</h1>
+  
+  <div class="demos">
+    <div class="demo-card">
+      <h2>Pin Map Demo</h2>
+      <p>Interactive Azure Maps demo where you can click to drop pins and see coordinates. Includes geolocation support and pin management features.</p>
+      <a href="./pin-map-demo/index.html">View Demo →</a>
+    </div>
+
+    <div class="demo-card">
+      <h2>Pen Map Demo</h2>
+      <p>Azure Maps demo application showcasing various mapping capabilities and interactive features.</p>
+      <a href="./New Demo Folder/pen-map-demo-test/index.html">View Demo →</a>
+    </div>
+  </div>
+
+  <div class="footer">
+    <p>Powered by Azure Static Web Apps & Azure Maps</p>
+  </div>
+</div>
+
+</body>
+</html>

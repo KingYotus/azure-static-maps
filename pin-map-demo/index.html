@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>Azure Maps – Pin Demo (Clean)</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <!-- Config for API Key -->
+  <script src="../config.js"></script>
+  <script src="../local-config.js" defer></script>
+
+  <!-- Azure Maps Web SDK v3 -->
+  <link rel="stylesheet" href="https://atlas.microsoft.com/sdk/javascript/mapcontrol/3/atlas.min.css">
+  <script src="https://atlas.microsoft.com/sdk/javascript/mapcontrol/3/atlas.min.js"></script>
+
+  <style>
+    html, body { height: 100%; margin: 0; }
+    #map { height: 100%; width: 100%; }
+    .toolbar {
+      position: absolute; top: 10px; left: 10px; z-index: 10;
+      display: flex; gap: 8px; padding: 8px;
+      background: rgba(255,255,255,0.95); border: 1px solid #e0e0e0; border-radius: 6px;
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; font-size: 14px;
+    }
+    .toolbar button {
+      padding: 6px 10px; border: 1px solid #c9c9c9; border-radius: 4px; background: #fff; cursor: pointer;
+    }
+    .toolbar button:hover { background: #f5f5f5; }
+    .coords {
+      position: absolute; bottom: 10px; left: 10px; z-index: 10;
+      background: rgba(255,255,255,0.95); border: 1px solid #e0e0e0; border-radius: 6px;
+      padding: 6px 8px; font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; font-size: 13px;
+    }
+  </style>
+</head>
+<body>
+
+<div id="map"></div>
+
+<div class="toolbar">
+  <button id="btnMyLocation" type="button">My location</button>
+  <button id="btnClear" type="button">Clear pins</button>
+</div>
+
+<div class="coords" id="coordReadout">Click the map to drop a pin</div>
+
+<script>
+  // --- 1) Create map ---
+  const map = new atlas.Map('map', {
+    center: [-95.9928, 36.1539], // Tulsa, OK
+    zoom: 6,
+    view: 'Auto',
+    authOptions: {
+      authType: 'subscriptionKey',
+      subscriptionKey: window.AZURE_MAPS_KEY || ''
+    }
+  });
+
+  // --- 2) Prepare layers & handlers when ready ---
+  map.events.add('ready', () => {
+    const dataSource = new atlas.source.DataSource();
+    map.sources.add(dataSource);
+
+    // Small round dots
+    const bubbles = new atlas.layer.BubbleLayer(dataSource, null, {
+      radius: 5,                  // <- make smaller/larger as you like
+      color: '#1a73e8',
+      strokeColor: '#ffffff',
+      strokeWidth: 1
+    });
+    map.layers.add(bubbles);
+
+    // Helper: robustly extract [lng, lat] from click
+    function getLngLatFromClick(e) {
+      // If already geographic [lng, lat]
+      if (Array.isArray(e.position) &&
+          typeof e.position[0] === 'number' && typeof e.position[1] === 'number' &&
+          Math.abs(e.position[0]) <= 180 && Math.abs(e.position[1]) <= 90) {
+        return e.position;
+      }
+      // Otherwise convert pixel to geographic
+      const pixel = e.pixel || e.position; // may be [x,y] or {x,y}
+      if (Array.isArray(pixel)) return map.pixelsToPositions([pixel])[0];
+      if (pixel && typeof pixel.x === 'number' && typeof pixel.y === 'number')
+        return map.pixelsToPositions([[pixel.x, pixel.y]])[0];
+      throw new Error('Unrecognized click event format');
+    }
+
+    // Click to add a dot
+    map.events.add('click', (e) => {
+      try {
+        const [lng, lat] = getLngLatFromClick(e);
+        dataSource.add(new atlas.data.Point([lng, lat]));
+        updateReadout(lat, lng);
+      } catch (err) {
+        console.error('Click handling failed:', err, e);
+      }
+    });
+
+    // Clear pins
+    document.getElementById('btnClear').addEventListener('click', () => {
+      dataSource.clear();
+      document.getElementById('coordReadout').textContent = 'Pins cleared';
+    });
+
+    // Center to browser location (if allowed)
+    document.getElementById('btnMyLocation').addEventListener('click', () => {
+      if (!navigator.geolocation) return alert('Geolocation not supported by this browser.');
+      navigator.geolocation.getCurrentPosition(
+        pos => {
+          const lat = pos.coords.latitude;
+          const lng = pos.coords.longitude;
+          map.setCamera({ center: [lng, lat], zoom: 14, duration: 500 });
+          dataSource.add(new atlas.data.Point([lng, lat]));
+          updateReadout(lat, lng);
+        },
+        err => alert('Unable to get location: ' + err.message),
+        { enableHighAccuracy: true, timeout: 8000, maximumAge: 0 }
+      );
+    });
+
+    // Seed one dot so you know the layer renders
+    dataSource.add(new atlas.data.Point([-95.9928, 36.1539]));
+    updateReadout(36.1539, -95.9928);
+  });
+
+  function updateReadout(lat, lng) {
+    document.getElementById('coordReadout').textContent =
+      `Last pin: lat ${lat.toFixed(5)}, lng ${lng.toFixed(5)}`;
+    console.log(`Pinned at: ${lat}, ${lng}`);
+  }
+</script>
+
+</body>
+</html>
