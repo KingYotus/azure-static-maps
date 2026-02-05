@@ -4,8 +4,6 @@
   <meta charset="utf-8" />
   <title>Azure Maps Demo</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <script src="./config.js"></script>
-  <script src="./local-config.js" defer></script>
   
   <!-- Azure Maps Web SDK v3 -->
   <link rel="stylesheet" href="https://atlas.microsoft.com/sdk/javascript/mapcontrol/3/atlas.min.css">
@@ -13,50 +11,70 @@
   
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
-    body {
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      height: 100vh;
-    }
+    body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; height: 100vh; }
     #map { height: 100%; width: 100%; }
     .toolbar {
       position: absolute; top: 10px; left: 10px; z-index: 10;
       display: flex; gap: 8px; padding: 8px;
       background: rgba(255,255,255,0.95); border: 1px solid #e0e0e0; border-radius: 6px;
-      font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; font-size: 14px;
     }
-    .toolbar button {
-      padding: 6px 10px; border: 1px solid #c9c9c9; border-radius: 4px; background: #fff; cursor: pointer;
-    }
+    .toolbar button { padding: 6px 10px; border: 1px solid #c9c9c9; border-radius: 4px; background: #fff; cursor: pointer; }
     .toolbar button:hover { background: #f5f5f5; }
     .coords {
       position: absolute; bottom: 10px; left: 10px; z-index: 10;
-      background: rgba(255,255,255,0.95); border: 1px solid #e0e0e0; border-radius: 6px;
-      padding: 6px 8px; font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; font-size: 13px;
+      background: rgba(255,255,255,0.95); border: 1px solid #e0e0e0; border-radius: 6px; padding: 6px 8px; font-size: 13px;
     }
   </style>
 </head>
 <body>
 
 <div id="map"></div>
-
 <div class="toolbar">
-  <button id="btnMyLocation" type="button">My location</button>
-  <button id="btnClear" type="button">Clear pins</button>
+  <button id="btnClear">Clear pins</button>
 </div>
-
 <div class="coords" id="coordReadout">Click the map to drop a pin</div>
 
 <script>
-  // Create map
+  // Initialize map
   const map = new atlas.Map('map', {
     center: [-95.9928, 36.1539],
     zoom: 6,
-    view: 'Auto',
     authOptions: {
       authType: 'subscriptionKey',
-      subscriptionKey: window.AZURE_MAPS_KEY || ''
+      subscriptionKey: 'ajucVAKMRPT3Z7uvMcnfObGhc5qkYf8gfovnMR3DATZVJisEVXYeJQQJ99CAACYeBjFVv4tJAAAgAZMP2sy2'
     }
   });
+
+  map.events.add('ready', () => {
+    const dataSource = new atlas.source.DataSource();
+    map.sources.add(dataSource);
+
+    const layer = new atlas.layer.BubbleLayer(dataSource, null, {
+      radius: 5,
+      color: '#1a73e8',
+      strokeColor: '#fff',
+      strokeWidth: 1
+    });
+    map.layers.add(layer);
+
+    map.events.add('click', (e) => {
+      const [lng, lat] = e.position;
+      dataSource.add(new atlas.data.Point([lng, lat]));
+      document.getElementById('coordReadout').textContent = `Lat: ${lat.toFixed(4)}, Lng: ${lng.toFixed(4)}`;
+    });
+
+    document.getElementById('btnClear').addEventListener('click', () => {
+      dataSource.clear();
+      document.getElementById('coordReadout').textContent = 'Pins cleared';
+    });
+
+    // Add initial pin
+    dataSource.add(new atlas.data.Point([-95.9928, 36.1539]));
+  });
+</script>
+
+</body>
+</html>
 
   // Initialize when map is ready
   map.events.add('ready', () => {
