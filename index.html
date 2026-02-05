@@ -35,21 +35,18 @@
 <div class="coords" id="coordReadout">Click the map to drop a pin</div>
 
 <script>
-  let apiKey = 'ajucVAKMRPT3Z7uvMcnfObGhc5qkYf8gfovnMR3DATZVJisEVXYeJQQJ99CAACYeBjFVv4tJAAAgAZMP2sy2';
-
-  // Try to load from config.json (works in Azure and with local server)
-  fetch('/config.json')
+  // Fetch API key from serverless function
+  fetch('/api/getConfig')
     .then(r => r.json())
     .then(config => {
-      apiKey = config.apiKey;
-      initMap();
+      initMap(config.apiKey);
     })
-    .catch(() => {
-      // Use default key if config fails (works for local file:// testing)
-      initMap();
+    .catch(err => {
+      console.error('Failed to load API key:', err);
+      alert('Failed to load Azure Maps API key');
     });
 
-  function initMap() {
+  function initMap(apiKey) {
     const map = new atlas.Map('map', {
       center: [-95.9928, 36.1539],
       zoom: 6,

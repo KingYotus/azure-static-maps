@@ -9,8 +9,5 @@
       "serve": "index.html",
       "statusCode": 200
     }
-  ],
-  "mimeTypes": {
-    ".json": "text/json"
-  }
+  ]
 }
