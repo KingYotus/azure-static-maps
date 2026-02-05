@@ -35,42 +35,56 @@
 <div class="coords" id="coordReadout">Click the map to drop a pin</div>
 
 <script>
-  // Initialize map
-  const map = new atlas.Map('map', {
-    center: [-95.9928, 36.1539],
-    zoom: 6,
-    authOptions: {
-      authType: 'subscriptionKey',
-      subscriptionKey: 'ajucVAKMRPT3Z7uvMcnfObGhc5qkYf8gfovnMR3DATZVJisEVXYeJQQJ99CAACYeBjFVv4tJAAAgAZMP2sy2'
-    }
-  });
+  let apiKey = '';
 
-  map.events.add('ready', () => {
-    const dataSource = new atlas.source.DataSource();
-    map.sources.add(dataSource);
-
-    const layer = new atlas.layer.BubbleLayer(dataSource, null, {
-      radius: 5,
-      color: '#1a73e8',
-      strokeColor: '#fff',
-      strokeWidth: 1
-    });
-    map.layers.add(layer);
-
-    map.events.add('click', (e) => {
-      const [lng, lat] = e.position;
-      dataSource.add(new atlas.data.Point([lng, lat]));
-      document.getElementById('coordReadout').textContent = `Lat: ${lat.toFixed(4)}, Lng: ${lng.toFixed(4)}`;
+  // Fetch API key from config
+  fetch('/config.json')
+    .then(r => r.json())
+    .then(config => {
+      apiKey = config.apiKey;
+      initMap();
+    })
+    .catch(() => {
+      console.error('Failed to load config');
+      initMap();
     });
 
-    document.getElementById('btnClear').addEventListener('click', () => {
-      dataSource.clear();
-      document.getElementById('coordReadout').textContent = 'Pins cleared';
+  function initMap() {
+    const map = new atlas.Map('map', {
+      center: [-95.9928, 36.1539],
+      zoom: 6,
+      authOptions: {
+        authType: 'subscriptionKey',
+        subscriptionKey: apiKey
+      }
     });
 
-    // Add initial pin
-    dataSource.add(new atlas.data.Point([-95.9928, 36.1539]));
-  });
+    map.events.add('ready', () => {
+      const dataSource = new atlas.source.DataSource();
+      map.sources.add(dataSource);
+
+      const layer = new atlas.layer.BubbleLayer(dataSource, null, {
+        radius: 5,
+        color: '#1a73e8',
+        strokeColor: '#fff',
+        strokeWidth: 1
+      });
+      map.layers.add(layer);
+
+      map.events.add('click', (e) => {
+        const [lng, lat] = e.position;
+        dataSource.add(new atlas.data.Point([lng, lat]));
+        document.getElementById('coordReadout').textContent = `Lat: ${lat.toFixed(4)}, Lng: ${lng.toFixed(4)}`;
+      });
+
+      document.getElementById('btnClear').addEventListener('click', () => {
+        dataSource.clear();
+        document.getElementById('coordReadout').textContent = 'Pins cleared';
+      });
+
+      dataSource.add(new atlas.data.Point([-95.9928, 36.1539]));
+    });
+  }
 </script>
 
 </body>
